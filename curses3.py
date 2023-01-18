@@ -97,7 +97,8 @@ def jeu(win):
   # Tant que le joueur n'a pas quitter le jeu
   while key != 27:
     key = controle(win, key)
-
+    snake, score = deplacement(win, score, key, snake, food)
+    
   return score
 
 
@@ -105,37 +106,36 @@ def deplacement(win, score, key, snake, food):
 
 	# Si on appui sur la flèche "à droite",
 	# la tête se déplace de 1 caractère vers la droite (colonne + 1)
-	if key == KEY_RIGHT:
-		snake.insert(0, [snake[0][0], snake[0][0]+1])
+  if key == KEY_RIGHT:
+    snake.insert(0, [snake[0][0], snake[0][1]+1])
 
 	# Sinon si on appui sur la flèche "à gauche",
 	# la tête se déplace de 1 caractère vers la gauche (colonne - 1)
-	elif key == KEY_LEFT:
-		snake.insert(0, [snake[0][0], snake[0][0]-1])
+  elif key == KEY_LEFT:
+    snake.insert(0, [snake[0][0], snake[0][1]-1])
 
 	# Sinon si on appui sur la flèche "en haut",
 	# la tête se déplace de 1 caractère vers le haut (ligne - 1)
-	elif key == KEY_UP:
-		snake.insert(0, [snake[0][0]-1, snake[0][0]])
+  elif key == KEY_UP:
+    snake.insert(0, [snake[0][0]-1, snake[0][1]])
 
 	# Sinon si on appui sur la flèche "en bas",
 	# la tête se déplace de 1 caractère vers le bas (ligne + 1)
-	elif key == KEY_DOWN:
-		snake.insert(0, [snake[0][0]+1, snake[0][0]])
+  elif key == KEY_DOWN:
+    snake.insert(0, [snake[0][0]+1, snake[0][1]])
 
 	# si la serpent arrive au bord de la fenêtre (20 lignes x 60 colonnes)
-
-	if snake[0][0] == 19:
-    win.addstr(snake[0][0], snake[i][1], '*', curses.color_pair(3))
-		 
-	if snake[0][1] == 59:
-    win.addstr(snake[0][0], snake[i][1], '*', curses.color_pair(3))
+  if snake[0][0] == 0:
+    snake[0][0] = win.getmaxyx()[0]-2
+     
+  if snake[0][1] == 0:
+    snake[0][1] = win.getmaxyx()[1]-2
 		
-	if snake[0][0] == 0:
-    win.addstr(snake[0][0], snake[i][1], '*', curses.color_pair(3))
-		
-	if snake[0][1] == 0:
-    win.addstr(snake[0][0], snake[i][1], '*', curses.color_pair(3))
+  if snake[0][0] == win.getmaxyx()[0]-1:
+    snake[0][0] = 1
+    
+  if snake[0][1] == win.getmaxyx()[1]-1:
+    snake[0][1] = 1
 		
 
   
@@ -150,19 +150,19 @@ def deplacement(win, score, key, snake, food):
 
   
 	# Effacement du dernier anneau : affichage du caractère "espace" sur fond   noir
-	win.addstr(last[0], last[1], ' ', curses.color_pair(1))
+  win.addstr(last[0], last[1], ' ', curses.color_pair(1))
 
 	# Affichage du score dans l'aire de jeu
-	win.addstr(0, 2, 'Score : ' + str(score) + ' ')
+  win.addstr(0, 2, 'Score : ' + str(score) + ' ')
 
 	# Attendre avant le pas suivant
-	vitesse = 1
-	win.timeout(150//vitesse)
+  vitesse = 1
+  win.timeout(150//vitesse)
 
 	# tuple contenant :
 	# - la liste des positions en cours des anneaux du serpent
 	# - score en cours
-	return snake, score
+  return snake, score
 
 
 
