@@ -1,6 +1,7 @@
 import curses
 from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN
 import time
+from random import randint
 
 
 def affichage_titre(titre):
@@ -29,8 +30,8 @@ def affichage_aire_de_jeu(hauteur, largeur, titre):
 
 
 
-def controle(win, key, keys = [____]):
-	'''
+def controle(win, key, keys=[KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, 27]):
+  '''
 	Controles de jeu
 	paramètres :
 	  win : fenètre en cours
@@ -39,28 +40,27 @@ def controle(win, key, keys = [____]):
 	retour :
 	  code de la touche reconnue
 	'''
-	# Sauvegarde de la dernière touche reconnue
-	old_key = ____
+  # Sauvegarde de la dernière touche reconnue
+  old_key = key
 
-	# Aquisition d'un nouveau caractère depuis le clavier
-	key = win.____
+  # Aquisition d'un nouveau caractère depuis le clavier
+  key = win.getch()
 
-	# Si aucune touche actionnée (pas de nouveau caractère)
-	# ou pas dans la liste des touches acceptées
-	# key prend la valeur de la dernière touche connue
-	if key == ____ or key not in ____ :
-		key = ____
+  # Si aucune touche actionnée (pas de nouveau caractère)
+  # ou pas dans la liste des touches acceptées
+  # key prend la valeur de la dernière touche connue
+  if key == 0 or key not in keys:
+    key = old_key
 
-	# Raffaichissement de la fenètre
-	win.refresh()
+  # Raffaichissement de la fenètre
+  win.refresh()
 
-	# retourne le code la touche
-	return ____
-
+  # retourne le code la touche
+  return key
 
 
 def jeu(win):
-	'''
+  '''
 	Moteur du jeu
 	paramètre :
 	  win : fenètre en cours
@@ -68,116 +68,107 @@ def jeu(win):
 	  score à la fin du jeu
 	'''
 
-	# initialisation du jeu
-	# Le serpent se dirige vers la droite au début du jeu.
-	# C'est comme si le joueur avait utilisé la flèche droite au clavier
-	key = ____
-	score = 0
-    end = False
+  # initialisation du jeu
+  # Le serpent se dirige vers la droite au début du jeu.
+  # C'est comme si le joueur avait utilisé la flèche droite au clavier
+  key = KEY_RIGHT
+  score = 0
+  end = False
 
-	# Definition des coordonnées du serpent
-	# Le serpent est une liste de d'anneaux composées de leurs coordonnées ligne, colonne
-	# La tête du serpent est en 4,10, l'anneau 1 en 4,9, le 2 en 4,8
-	snake = [[4, 10], [4, 9], [4, 8]]
+  # Definition des coordonnées du serpent
+  # Le serpent est une liste de d'anneaux composées de leurs coordonnées ligne, colonne
+  # La tête du serpent est en 4,10, l'anneau 1 en 4,9, le 2 en 4,8
+  snake = [[4, 10], [4, 9], [4, 8]]
 
-	# La nouriture (pomme) se trouve en 10,20
-	food = [10, 20]
+  # La nouriture (pomme) se trouve en 10,20
+  food = [10, 20]
 
-	# Affichage la nouriture en vert sur fond noir dans la fenêtre
-	curses.init_pair(2, curses.______, curses.______)
-	win.addch(food[0], food[1], chr(211), curses.color_pair(2))  # Prints the food
+  # Affichage la nouriture en vert sur fond noir dans la fenêtre
+  curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+  win.addch(food[0], food[1], chr(211),
+            curses.color_pair(2))  # Prints the food
 
-	# Affichage du serpent en bleu sur fond jaune
-	curses.init_pair(3, curses.____, curses.____)
-	# sur toute la longeur du serpent
-	for i in range(______)):
-		# affichage de chaque anneau dans la fenêtre en ligne, colonne
-		win.addstr(snake[i][0], snake[i][1], '*', curses.color_pair(3))
+  # Affichage du serpent en bleu sur fond jaune
+  curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_YELLOW)
+  # sur toute la longeur du serpent
+  for i in range(len(snake)):
+    # affichage de chaque anneau dans la fenêtre en ligne, colonne
+    win.addstr(snake[i][0], snake[i][1], '*', curses.color_pair(3))
 
-	# Emission d'un beep  au début du jeu
-	curses.____
+  # Emission d'un beep  au début du jeu
+  curses.beep()
 
-	# tant que pas Escape ou pas end
-	while key != 27 ___  ___  end:
-
-		key = controle(win, key)
-		snake, score = deplacement(win, score, key, snake, food)
-		end =  perdu(win, snake)
-
-	return score
+  # Tant que le joueur n'a pas quitter le jeu
+  while key != 27 and not end:
+    key = controle(win, key)
+    snake, score = deplacement(win, score, key, snake, food)
+    end =  perdu(win, snake)
+    
+  return score
 
 
 
 def deplacement(win, score, key, snake, food):
-	'''
-	Déplacements du serpent
-	paramètres :
-	  win : fenètre en cours
-	  score : score en cours
-	  key : touche de controle en cours
-	  snake : liste des positions en cours des anneaux du serpent
-	  food : liste de la position de la pomme
-	retourne :
-	  tuple contenant la liste des positions en cours des anneaux du serpent et score en cours
-	'''
+
 	# Si on appui sur la flèche "à droite",
 	# la tête se déplace de 1 caractère vers la droite (colonne + 1)
-	if key == KEY_RIGHT:
-		snake.insert(0, ________, ________)
+  if key == KEY_RIGHT:
+    snake.insert(0, [snake[0][0], snake[0][1]+1])
 
 	# Sinon si on appui sur la flèche "à gauche",
 	# la tête se déplace de 1 caractère vers la gauche (colonne - 1)
-	elif key == KEY_LEFT:
-		snake.insert(0, ________, ________)
+  elif key == KEY_LEFT:
+    snake.insert(0, [snake[0][0], snake[0][1]-1])
 
 	# Sinon si on appui sur la flèche "en haut",
 	# la tête se déplace de 1 caractère vers le haut (ligne - 1)
-	elif key == KEY_UP:
-		snake.insert(0, ________, ________)
+  elif key == KEY_UP:
+    snake.insert(0, [snake[0][0]-1, snake[0][1]])
 
 	# Sinon si on appui sur la flèche "en bas",
 	# la tête se déplace de 1 caractère vers le bas (ligne + 1)
-	elif key == KEY_DOWN:
-		snake.insert(0, ________, ________)
+  elif key == KEY_DOWN:
+    snake.insert(0, [snake[0][0]+1, snake[0][1]])
 
 	# si la serpent arrive au bord de la fenêtre (20 lignes x 60 colonnes)
-	if snake[0][0] == __:
-		 ________________
+  if snake[0][0] == 0:
+    snake[0][0] = win.getmaxyx()[0]-2
+     
+  if snake[0][1] == 0:
+    snake[0][1] = win.getmaxyx()[1]-2
+		
+  if snake[0][0] == win.getmaxyx()[0]-1:
+    snake[0][0] = 1
+    
+  if snake[0][1] == win.getmaxyx()[1]-1:
+    snake[0][1] = 1
+		
 
-	if snake[0][1] == __:
-		________________
-
-	if snake[0][0] == __:
-		 ________________
-
-	if snake[0][1] == __:
-		________________
-
-
+  
 	# Suppression du dernier anneau du serpent.
-	# Sera conditionner plus tard au fait que le serpent mange ou pas une pomme
-	# Le score sera alors également mis à jour
-	# remplacer last = snake.pop() par :
-	food, snake, last, score = mange_pomme(win, food, snake, score)
+	# Sera conditionner plus tard au fait que le serpent mange ou pas une       pomme
+  # Le score sera alors également mis à jour
+  food, snake, last, score = mange_pomme(win, food, snake, score)
 
+  
+  # Affichage de la tête à sa nouvelle position en bleu sur fond jaune
+  win.addstr(snake[0][0], snake[0][1], '*', curses.color_pair(3))
 
-	# Affichage de la tête à sa nouvelle position en bleu sur fond jaune
-	win.addstr(____, ____, ___, curses.color_pair(__))
-
-	# Effacement du dernier anneau : affichage du caractère "espace" sur fond noir
-	win.addstr(last[0], last[1], ' ', curses.color_pair(1))
+  
+	# Effacement du dernier anneau : affichage du caractère "espace" sur fond   noir
+  win.addstr(last[0], last[1], ' ', curses.color_pair(1))
 
 	# Affichage du score dans l'aire de jeu
-	win.addstr(0, 2, 'Score : ' + str(score) + ' ')
+  win.addstr(0, 2, 'Score : ' + str(score) + ' ')
 
 	# Attendre avant le pas suivant
-	vitesse = 1
-	win.timeout(150//vitesse)
+  vitesse = 1
+  win.timeout(150//vitesse)
 
 	# tuple contenant :
 	# - la liste des positions en cours des anneaux du serpent
 	# - score en cours
-	return snake, score
+  return snake, score
 
 def mange_pomme(win, food, snake, score):
 	'''
@@ -198,25 +189,25 @@ def mange_pomme(win, food, snake, score):
 	last = [0,0]
 
 	# Si le serpent a mangé la pomme
-	__________________:
+	if snake[0] == food:
 		# Emettre un beep
 		curses.beep()
 
 		# incrémenter le score
-		score _____________
+		score += 1
 
 		# Réactualiser les coordonnées de la pomme
 		# On recommence tant que les coordonnées de la pomme sont dans le serpent
-		while _____ in _____:
+		while food in snake:
 
 			# On actualise au hasard les coordonnées de la pomme
 			# dans les limite de la fenêtre
 			# voir la documentation de la fonction window.getmaxyx()
-			food[0] = randint(1, ___________________)
-			food[1] = randint(1, ___________________)
+			food[0] = randint(1, win.getmaxyx()[0]-2)
+			food[1] = randint(1, win.getmaxyx()[1]-2)
 
 		# Affichage de la pomme aux nouvelles coordonnées en vert sur fond noir
-		win.addch(____, ____, chr(211), curses.color_pair(2))
+		win.addch(food[0], food[1], chr(211), curses.color_pair(2))
 		win.refresh()
 
 	# Sinon
@@ -238,14 +229,14 @@ def perdu(win, snake):
 	'''
 
 	# initialisation de la variable end à retourner
-	end = ______
+	end = False
 
 	# Si la tête du serpent est dans le corps
-	if ______ in _____ :
+	if snake[0] in snake[1:]:
 
-		# Afiicher "GAME OVER !" en blanc sur fond rouge au milieu de la fenêtre
-		curses.init_pair(4, curses.______, curses.______)
-		win.addstr(________, ________, ________)
+		# Afficher "GAME OVER !" en blanc sur fond rouge au milieu de la fenêtre
+		curses.init_pair(4, curses.COLOR_RED, curses.COLOR_WHITE)
+		win.addstr(win.getmaxyx()[0]//2, win.getmaxyx()[1]//2-5, "GAME OVER !", 4)
 		win.refresh()
 
 		# Emission d'une série de beep.
